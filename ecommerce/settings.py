@@ -39,9 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
      'accounts',    # Handles users, login, signup, profiles
-    'products',    # Handles product catalog
-    'orders',      # Handles cart, checkout, and orders
-    'payments',    # Handles payments
+     'products',    # Handles product catalog
+     'orders',      # Handles cart, checkout, and orders
+     'payments',   
+     'main',
+     'shop', # Handles payments
 
 
     # Third-party apps
@@ -90,6 +92,7 @@ DATABASES = {
 }
 
 
+
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -130,3 +133,6 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
