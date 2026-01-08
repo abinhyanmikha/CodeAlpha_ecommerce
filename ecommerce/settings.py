@@ -45,6 +45,7 @@ INSTALLED_APPS = [
      'main',
      'shop', # Handles payments
 
+    
 
     # Third-party apps
     'rest_framework',
