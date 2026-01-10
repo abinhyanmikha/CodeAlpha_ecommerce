@@ -1,17 +1,17 @@
 {% extends 'base.html' %} 
 
 {% block content %}
-<div class="cart-container">
+<div class="cart-container" id="cart-container">
     <div class="cart-header">
         <h1>Shopping Cart</h1>
-        <p>You have {{ items|length }} item(s) in your cart</p>
+        <p id="item-count-text">You have {{ items|length }} item(s) in your cart</p>
     </div>
 
     {% if items %}
-        <div class="cart-grid">
-            <div class="cart-items">
+        <div class="cart-grid" id="full-cart">
+            <div class="cart-items" id="cart-items-list">
                 {% for item in items %}
-                    <div class="cart-item">
+                    <div class="cart-item" data-product-id="{{ item.product.id }}" id="cart-item-{{ item.product.id }}">
                         {% if item.product.image %}
                             <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-img">
                         {% else %}
@@ -22,34 +22,35 @@
                         
                         <div class="item-info">
                             <h3 style="margin-bottom: 0.25rem; font-family: 'Outfit', sans-serif;">{{ item.product.name }}</h3>
-                            <p style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);"><i class="fas fa-check-circle" style="color: var(--secondary); font-size: 0.7rem;"></i> {{ item.product.stock }} available • Premium</p>
+                            <p style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
+                                <i class="fas fa-check-circle" style="color: var(--secondary); font-size: 0.7rem;"></i> 
+                                <span class="stock-count">{{ item.product.stock }}</span> available • Premium
+                            </p>
                             
                             <div style="display: flex; align-items: center; gap: 1.5rem;">
                                 <div class="qty-controls">
-                                    <a href="{% url 'decrease_cart' item.product.id %}" class="qty-btn" title="Decrease">
+                                    <button class="qty-btn ajax-cart-btn" data-action="decrease" data-url="{% url 'decrease_cart' item.product.id %}" title="Decrease">
                                         <i class="fas fa-minus"></i>
-                                    </a>
-                                    <span style="font-weight: 600; min-width: 20px; text-align: center;">{{ item.quantity }}</span>
+                                    </button>
+                                    <span class="item-quantity" style="font-weight: 600; min-width: 20px; text-align: center;">{{ item.quantity }}</span>
                                     
-                                    {% if item.quantity < item.product.stock %}
-                                        <a href="{% url 'add_to_cart' item.product.id %}" class="qty-btn" title="Increase">
-                                            <i class="fas fa-plus"></i>
-                                        </a>
-                                    {% else %}
-                                        <span class="qty-btn btn-disabled" title="Max Stock Reached" style="opacity: 0.3;">
-                                            <i class="fas fa-plus"></i>
-                                        </span>
-                                    {% endif %}
+                                    <button class="qty-btn ajax-cart-btn {% if item.quantity >= item.product.stock %}btn-disabled-style{% endif %}" 
+                                            data-action="increase" 
+                                            data-url="{% url 'add_to_cart' item.product.id %}" 
+                                            title="Increase"
+                                            {% if item.quantity >= item.product.stock %}disabled style="opacity: 0.3;"{% endif %}>
+                                        <i class="fas fa-plus"></i>
+                                    </button>
                                 </div>
                                 
-                                <a href="{% url 'remove_from_cart' item.product.id %}" class="item-remove" style="margin-top: 0;">
+                                <button class="item-remove ajax-cart-btn" data-action="remove" data-url="{% url 'remove_from_cart' item.product.id %}" style="margin-top: 0; background: none; border: none; cursor: pointer;">
                                     <i class="fas fa-trash-alt"></i>
-                                </a>
+                                </button>
                             </div>
                         </div>
                         
                         <div class="item-pricing">
-                            <div class="item-price" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Rs. {{ item.subtotal }}</div>
+                            <div class="item-price-subtotal" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Rs. {{ item.subtotal }}</div>
                             <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Rs. {{ item.product.price }} / unit</p>
                         </div>
                     </div>
@@ -61,7 +62,7 @@
                 <div class="summary-details" style="margin-top: 1.5rem;">
                     <div class="summary-row">
                         <span>Subtotal</span>
-                        <span>Rs. {{ total_amount }}</span>
+                        <span class="cart-total-display">Rs. {{ total_amount }}</span>
                     </div>
                     <div class="summary-row">
                         <span>Shipping</span>
@@ -74,11 +75,11 @@
                     
                     <div class="summary-row total">
                         <span>Total</span>
-                        <span>Rs. {{ total_amount }}</span>
+                        <span class="cart-total-display">Rs. {{ total_amount }}</span>
                     </div>
                 </div>
                 
-                <a href="{% url 'checkout' %}" class="btn-primary checkout-btn" style="display: block; text-align: center; text-decoration: none;">
+                <a href="{% url 'checkout' %}" class="btn-primary checkout-btn" id="checkout-link" style="display: block; text-align: center; text-decoration: none;">
                     Proceed to Checkout <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
                 </a>
                 
@@ -87,15 +88,123 @@
                 </p>
             </div>
         </div>
-    {% else %}
-        <div class="empty-cart-state">
-            <i class="fas fa-shopping-basket"></i>
-            <h2>Your cart is looking a bit lonely</h2>
-            <p style="margin-bottom: 2rem; color: var(--text-muted);">Explore our latest premium collection and find something you'll love.</p>
-            <a href="{% url 'home' %}" class="btn-primary">
-                Browse Products
-            </a>
-        </div>
     {% endif %}
+
+    <div class="empty-cart-state {% if items %}hidden-element{% endif %}" id="empty-cart-msg">
+        <i class="fas fa-shopping-basket"></i>
+        <h2>Your cart is looking a bit lonely</h2>
+        <p style="margin-bottom: 2rem; color: var(--text-muted);">Explore our latest premium collection and find something you'll love.</p>
+        <a href="{% url 'home' %}" class="btn-primary">
+            Browse Products
+        </a>
+    </div>
 </div>
+
+<style>
+    .hidden-element { display: none !important; }
+    .btn-disabled-style { cursor: not-allowed !important; }
+    .qty-btn { border: none; cursor: pointer; }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cartItemsList = document.getElementById('cart-items-list');
+    
+    // Delegate clicks to handle AJAX for all buttons
+    document.addEventListener('click', function(e) {
+        const btn = e.target.closest('.ajax-cart-btn');
+        if (!btn) return;
+        
+        e.preventDefault();
+        const url = btn.dataset.url;
+        const action = btn.dataset.action;
+        const productId = btn.closest('.cart-item')?.dataset.productId;
+
+        // Show loading state (optional)
+        btn.style.opacity = '0.5';
+        btn.disabled = true;
+
+        fetch(url, {
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': '{{ csrf_token }}'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success || action === 'decrease' || action === 'remove') {
+                updateCartUI(data, productId, action);
+            } else if (data.message) {
+                // Show error message
+                alert(data.message);
+            }
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            btn.style.opacity = '1';
+            btn.disabled = false;
+        });
+    });
+
+    function updateCartUI(data, productId, action) {
+        const cart = data.cart;
+        
+        // Update Total Displays
+        document.querySelectorAll('.cart-total-display').forEach(el => {
+            el.textContent = 'Rs. ' + cart.total_amount.toFixed(1);
+        });
+
+        document.getElementById('item-count-text').textContent = `You have ${cart.total_items} item(s) in your cart`;
+
+        // Check if item was removed (either via remove button or decrease to 0)
+        const itemData = data.item;
+        const itemRow = document.getElementById(`cart-item-${productId}`);
+
+        if (!itemData && itemRow) {
+            // Remove item with effect
+            itemRow.style.transform = 'translateX(50px)';
+            itemRow.style.opacity = '0';
+            setTimeout(() => {
+                itemRow.remove();
+                if (cart.total_items === 0) {
+                    showEmptyState();
+                }
+            }, 300);
+        } else if (itemData && itemRow) {
+            // Update Quantity
+            const qtySpan = itemRow.querySelector('.item-quantity');
+            qtySpan.textContent = itemData.quantity;
+
+            // Update Subtotal
+            const subtotalDiv = itemRow.querySelector('.item-price-subtotal');
+            subtotalDiv.textContent = 'Rs. ' + itemData.subtotal.toFixed(1);
+
+            // Update Increase Button State
+            const incBtn = itemRow.querySelector('[data-action="increase"]');
+            if (itemData.quantity >= itemData.stock) {
+                incBtn.disabled = true;
+                incBtn.style.opacity = '0.3';
+                incBtn.classList.add('btn-disabled-style');
+            } else {
+                incBtn.disabled = false;
+                incBtn.style.opacity = '1';
+                incBtn.classList.remove('btn-disabled-style');
+            }
+        }
+
+        if (cart.total_items === 0) {
+            showEmptyState();
+        }
+    }
+
+    function showEmptyState() {
+        const fullCart = document.getElementById('full-cart');
+        if (fullCart) fullCart.classList.add('hidden-element');
+        const emptyMsg = document.getElementById('empty-cart-msg');
+        if (emptyMsg) emptyMsg.classList.remove('hidden-element');
+    }
+});
+</script>
 {% endblock %}

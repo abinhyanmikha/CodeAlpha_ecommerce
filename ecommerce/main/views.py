@@ -5,6 +5,7 @@ from .models import Product, Order, OrderItem
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.db import transaction
+from django.http import JsonResponse
 
 # -------------------------
 # Home & Product Views
@@ -24,17 +25,60 @@ def product_list(request):
 # -------------------------
 # Cart Views
 # -------------------------
+def _get_cart_data(request):
+    cart = request.session.get('cart', {})
+    items = []
+    total_amount = 0
+    total_items = 0
+
+    for pid, quantity in cart.items():
+        try:
+            product = Product.objects.get(id=pid)
+            subtotal = product.price * quantity
+            total_amount += subtotal
+            total_items += quantity
+            items.append({
+                'product_id': product.id,
+                'name': product.name,
+                'price': float(product.price),
+                'quantity': quantity,
+                'subtotal': float(subtotal),
+                'stock': product.stock
+            })
+        except Product.DoesNotExist:
+            continue
+    
+    return {
+        'items': items,
+        'total_amount': float(total_amount),
+        'total_items': total_items
+    }
+
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart = request.session.get('cart', {})
     
     current_qty = cart.get(str(product_id), 0)
+    success = False
+    message = ""
+
     if product.stock > current_qty:
         cart[str(product_id)] = current_qty + 1
         request.session['cart'] = cart
-        # Optional: message can be added here
+        success = True
     else:
-        messages.error(request, f"Insufficient stock for {product.name}. Only {product.stock} available.")
+        message = f"Insufficient stock. Only {product.stock} available."
+        if not request.headers.get('x-requested-with') == 'XMLHttpRequest':
+            messages.error(request, message)
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        cart_data = _get_cart_data(request)
+        return JsonResponse({
+            'success': success,
+            'message': message,
+            'cart': cart_data,
+            'item': next((i for i in cart_data['items'] if i['product_id'] == product_id), None)
+        })
         
     return redirect('cart')
 
@@ -46,6 +90,15 @@ def decrease_cart(request, product_id):
         else:
             del cart[str(product_id)]
         request.session['cart'] = cart
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        cart_data = _get_cart_data(request)
+        return JsonResponse({
+            'success': True,
+            'cart': cart_data,
+            'item': next((i for i in cart_data['items'] if i['product_id'] == product_id), None)
+        })
+        
     return redirect('cart')
 
 def remove_from_cart(request, product_id):
@@ -53,19 +106,28 @@ def remove_from_cart(request, product_id):
     if str(product_id) in cart:
         del cart[str(product_id)]
         request.session['cart'] = cart
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'success': True,
+            'cart': _get_cart_data(request)
+        })
+        
     return redirect('cart')
 
 def cart(request):
-    cart = request.session.get('cart', {})
+    data = _get_cart_data(request)
+    # Convert internal data back to template format if needed, 
+    # but let's just use the direct items for standard render
+    cart_session = request.session.get('cart', {})
     items = []
     total_amount = 0
-
-    for pid, quantity in cart.items():
+    for pid, quantity in cart_session.items():
         product = get_object_or_404(Product, id=pid)
         subtotal = product.price * quantity
         total_amount += subtotal
         items.append({'product': product, 'quantity': quantity, 'subtotal': subtotal})
-
+    
     return render(request, 'cart.html', {'items': items, 'total_amount': total_amount})
 
 # -------------------------
