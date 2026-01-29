@@ -1,116 +1,93 @@
 {% extends 'base.html' %} 
 
 {% block content %}
-<div class="cart-container" id="cart-container">
-    <div class="cart-header">
-        <h1>Shopping Cart</h1>
-        <p id="item-count-text">You have {{ items|length }} item(s) in your cart</p>
+<div class="cart-container" id="cart-container" style="max-width: 1000px; margin: 0 auto; padding: 2rem 0;">
+    <div class="cart-header" style="margin-bottom: 2.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1.5rem;">
+        <h1 style="font-family: 'Outfit', sans-serif; font-size: 2rem; margin-bottom: 0.5rem;">Shopping Cart</h1>
+        <p id="item-count-text" style="color: var(--text-muted); font-size: 0.95rem;">You have {{ items|length }} item(s) in your cart</p>
     </div>
 
     {% if items %}
-        <div class="cart-grid" id="full-cart">
-            <div class="cart-items" id="cart-items-list">
+        <div class="cart-grid" id="full-cart" style="display: grid; grid-template-columns: 1fr 320px; gap: 3rem; align-items: start;">
+            <div class="cart-items" id="cart-items-list" style="display: flex; flex-direction: column; gap: 1.5rem;">
                 {% for item in items %}
-                    <div class="cart-item" data-product-id="{{ item.product.id }}" id="cart-item-{{ item.product.id }}">
-                        {% if item.product.image %}
-                            <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" class="item-img">
-                        {% else %}
-                            <div class="item-img" style="display: flex; align-items: center; justify-content: center; background: #2d3748; color: #718096;">
-                                <i class="fas fa-image fa-2x"></i>
-                            </div>
-                        {% endif %}
+                    <div class="cart-item" data-product-id="{{ item.product.id }}" id="cart-item-{{ item.product.id }}" style="display: flex; gap: 1.5rem; padding: 1.5rem; background: white; border: 1px solid var(--border); border-radius: 12px; align-items: center;">
+                        <div style="width: 100px; height: 100px; background: var(--bg-alt); border-radius: 8px; overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                            {% if item.product.image %}
+                                <img src="{{ item.product.image.url }}" alt="{{ item.product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                            {% else %}
+                                <i class="fas fa-image fa-2x" style="color: var(--border);"></i>
+                            {% endif %}
+                        </div>
                         
-                        <div class="item-info">
-                            <h3 style="margin-bottom: 0.25rem; font-family: 'Outfit', sans-serif;">{{ item.product.name }}</h3>
-                            <p style="margin-bottom: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-                                <i class="fas fa-check-circle" style="color: var(--secondary); font-size: 0.7rem;"></i> 
-                                <span class="stock-count">{{ item.product.stock }}</span> available • Premium
-                            </p>
+                        <div class="item-info" style="flex: 1;">
+                            <h3 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 0.25rem;">{{ item.product.name }}</h3>
+                            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1rem;">Rs. {{ item.product.price }} / unit</p>
                             
-                            <div style="display: flex; align-items: center; gap: 1.5rem;">
-                                <div class="qty-controls">
-                                    <button class="qty-btn ajax-cart-btn" data-action="decrease" data-url="{% url 'decrease_cart' item.product.id %}" title="Decrease">
-                                        <i class="fas fa-minus"></i>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <div class="qty-controls" style="display: flex; align-items: center; gap: 0.75rem; background: var(--bg-alt); padding: 0.4rem; border-radius: 8px;">
+                                    <button class="qty-btn ajax-cart-btn" data-action="decrease" data-url="{% url 'decrease_cart' item.product.id %}" style="background: white; border: 1px solid var(--border); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-minus" style="font-size: 0.7rem;"></i>
                                     </button>
-                                    <span class="item-quantity" style="font-weight: 600; min-width: 20px; text-align: center;">{{ item.quantity }}</span>
-                                    
-                                    <button class="qty-btn ajax-cart-btn {% if item.quantity >= item.product.stock %}btn-disabled-style{% endif %}" 
-                                            data-action="increase" 
-                                            data-url="{% url 'add_to_cart' item.product.id %}" 
-                                            title="Increase"
-                                            {% if item.quantity >= item.product.stock %}disabled style="opacity: 0.3;"{% endif %}>
-                                        <i class="fas fa-plus"></i>
+                                    <span class="item-quantity" style="font-weight: 600; font-size: 0.9rem; min-width: 20px; text-align: center;">{{ item.quantity }}</span>
+                                    <button class="qty-btn ajax-cart-btn" data-action="increase" data-url="{% url 'add_to_cart' item.product.id %}" {% if item.quantity >= item.product.stock %}disabled style="opacity: 0.3;"{% endif %} style="background: white; border: 1px solid var(--border); width: 28px; height: 28px; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center;">
+                                        <i class="fas fa-plus" style="font-size: 0.7rem;"></i>
                                     </button>
                                 </div>
                                 
-                                <button class="item-remove ajax-cart-btn" data-action="remove" data-url="{% url 'remove_from_cart' item.product.id %}" style="margin-top: 0; background: none; border: none; cursor: pointer;">
-                                    <i class="fas fa-trash-alt"></i>
+                                <button class="item-remove ajax-cart-btn" data-action="remove" data-url="{% url 'remove_from_cart' item.product.id %}" style="background: none; border: none; cursor: pointer; color: #ef4444; font-size: 0.9rem; margin-left: 0.5rem;">
+                                    <i class="fas fa-trash-alt"></i> Remove
                                 </button>
                             </div>
                         </div>
                         
-                        <div class="item-pricing">
-                            <div class="item-price-subtotal" style="font-size: 1.25rem; font-weight: 800; color: var(--text-main);">Rs. {{ item.subtotal }}</div>
-                            <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.25rem;">Rs. {{ item.product.price }} / unit</p>
+                        <div class="item-pricing" style="text-align: right;">
+                            <div class="item-price-subtotal" style="font-size: 1.15rem; font-weight: 700; color: var(--text-main);">Rs. {{ item.subtotal }}</div>
                         </div>
                     </div>
                 {% endfor %}
             </div>
 
-            <div class="cart-summary">
-                <h3>Order Summary</h3>
-                <div class="summary-details" style="margin-top: 1.5rem;">
-                    <div class="summary-row">
-                        <span>Subtotal</span>
-                        <span class="cart-total-display">Rs. {{ total_amount }}</span>
+            <div class="cart-summary" style="background: white; border: 1px solid var(--border); border-radius: 12px; padding: 1.5rem; position: sticky; top: 100px;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1.5rem;">Order Summary</h3>
+                <div class="summary-details" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+                        <span style="color: var(--text-muted);">Subtotal</span>
+                        <span class="cart-total-display" style="font-weight: 600;">Rs. {{ total_amount }}</span>
                     </div>
-                    <div class="summary-row">
-                        <span>Shipping</span>
-                        <span style="color: var(--secondary);">FREE</span>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.95rem;">
+                        <span style="color: var(--text-muted);">Shipping</span>
+                        <span style="color: var(--secondary); font-weight: 600;">FREE</span>
                     </div>
-                    <div class="summary-row">
-                        <span>Tax (Estimated)</span>
-                        <span>Rs. 0.00</span>
-                    </div>
-                    
-                    <div class="summary-row total">
+                    <div style="border-top: 1px solid var(--border); margin-top: 0.5rem; padding-top: 1rem; display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: 800;">
                         <span>Total</span>
                         <span class="cart-total-display">Rs. {{ total_amount }}</span>
                     </div>
                 </div>
                 
-                <a href="{% url 'checkout' %}" class="btn-primary checkout-btn" id="checkout-link" style="display: block; text-align: center; text-decoration: none;">
-                    Proceed to Checkout <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
+                <a href="{% url 'checkout' %}" class="btn-primary" style="display: flex; width: 100%; margin-top: 2rem; padding: 1rem; justify-content: center;">
+                    Checkout <i class="fas fa-arrow-right" style="margin-left: 0.5rem;"></i>
                 </a>
-                
-                <p style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-muted); text-align: center;">
-                    <i class="fas fa-shield-alt"></i> Secure checkout powered by AG Shop
-                </p>
             </div>
         </div>
     {% endif %}
 
-    <div class="empty-cart-state {% if items %}hidden-element{% endif %}" id="empty-cart-msg">
-        <i class="fas fa-shopping-basket"></i>
-        <h2>Your cart is looking a bit lonely</h2>
-        <p style="margin-bottom: 2rem; color: var(--text-muted);">Explore our latest premium collection and find something you'll love.</p>
+    <div class="empty-cart-state {% if items %}hidden-element{% endif %}" id="empty-cart-msg" style="text-align: center; padding: 6rem 0;">
+        <i class="fas fa-shopping-basket fa-4x" style="color: var(--border); margin-bottom: 2rem;"></i>
+        <h2 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Your cart is empty</h2>
+        <p style="color: var(--text-muted); margin-bottom: 2rem;">Looks like you haven't added anything to your cart yet.</p>
         <a href="{% url 'home' %}" class="btn-primary">
-            Browse Products
+            Start Shopping
         </a>
     </div>
 </div>
 
 <style>
     .hidden-element { display: none !important; }
-    .btn-disabled-style { cursor: not-allowed !important; }
-    .qty-btn { border: none; cursor: pointer; }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const cartItemsList = document.getElementById('cart-items-list');
-    
-    // Delegate clicks to handle AJAX for all buttons
     document.addEventListener('click', function(e) {
         const btn = e.target.closest('.ajax-cart-btn');
         if (!btn) return;
@@ -120,83 +97,54 @@ document.addEventListener('DOMContentLoaded', function() {
         const action = btn.dataset.action;
         const productId = btn.closest('.cart-item')?.dataset.productId;
 
-        // Show loading state (optional)
-        btn.style.opacity = '0.5';
         btn.disabled = true;
 
         fetch(url, {
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': '{{ csrf_token }}'
-            }
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': '{{ csrf_token }}' }
         })
         .then(response => response.json())
         .then(data => {
             if (data.success || action === 'decrease' || action === 'remove') {
                 updateCartUI(data, productId, action);
-            } else if (data.message) {
-                // Show error message
-                alert(data.message);
             }
-            btn.style.opacity = '1';
             btn.disabled = false;
         })
         .catch(error => {
             console.error('Error:', error);
-            btn.style.opacity = '1';
             btn.disabled = false;
         });
     });
 
     function updateCartUI(data, productId, action) {
         const cart = data.cart;
-        
-        // Update Total Displays
         document.querySelectorAll('.cart-total-display').forEach(el => {
             el.textContent = 'Rs. ' + cart.total_amount.toFixed(1);
         });
-
         document.getElementById('item-count-text').textContent = `You have ${cart.total_items} item(s) in your cart`;
 
-        // Check if item was removed (either via remove button or decrease to 0)
         const itemData = data.item;
         const itemRow = document.getElementById(`cart-item-${productId}`);
 
         if (!itemData && itemRow) {
-            // Remove item with effect
-            itemRow.style.transform = 'translateX(50px)';
             itemRow.style.opacity = '0';
             setTimeout(() => {
                 itemRow.remove();
-                if (cart.total_items === 0) {
-                    showEmptyState();
-                }
+                if (cart.total_items === 0) showEmptyState();
             }, 300);
         } else if (itemData && itemRow) {
-            // Update Quantity
-            const qtySpan = itemRow.querySelector('.item-quantity');
-            qtySpan.textContent = itemData.quantity;
-
-            // Update Subtotal
-            const subtotalDiv = itemRow.querySelector('.item-price-subtotal');
-            subtotalDiv.textContent = 'Rs. ' + itemData.subtotal.toFixed(1);
-
-            // Update Increase Button State
+            itemRow.querySelector('.item-quantity').textContent = itemData.quantity;
+            itemRow.querySelector('.item-price-subtotal').textContent = 'Rs. ' + itemData.subtotal.toFixed(1);
+            
             const incBtn = itemRow.querySelector('[data-action="increase"]');
             if (itemData.quantity >= itemData.stock) {
                 incBtn.disabled = true;
                 incBtn.style.opacity = '0.3';
-                incBtn.classList.add('btn-disabled-style');
             } else {
                 incBtn.disabled = false;
                 incBtn.style.opacity = '1';
-                incBtn.classList.remove('btn-disabled-style');
             }
         }
-
-        if (cart.total_items === 0) {
-            showEmptyState();
-        }
+        if (cart.total_items === 0) showEmptyState();
     }
 
     function showEmptyState() {
