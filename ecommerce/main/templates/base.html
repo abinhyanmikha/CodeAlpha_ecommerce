@@ -28,6 +28,11 @@
                 </a>
                 {% if user.is_authenticated %}
                     <div class="user-menu">
+                        {% if user.is_staff %}
+                            <a href="/admin/" target="_blank" class="btn-outline" style="margin-right: 0.5rem; border-color: var(--primary); color: var(--primary) !important;">
+                                <i class="fas fa-user-shield"></i> Admin
+                            </a>
+                        {% endif %}
                         <a href="/profile/" class="{% if '/profile/' in request.path %}active{% endif %}" style="margin-right: 0.5rem; color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem;">Profile</a>
                         <span class="user-greeting">Hi, {{ user.username }}</span>
                         <a href="/logout/" class="btn-outline">Logout</a>
