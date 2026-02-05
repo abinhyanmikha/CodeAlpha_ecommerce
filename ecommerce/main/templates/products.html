@@ -1,19 +1,8 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="home-hero">
-  <h1>Your Ultimate <span>Aquarium</span> Destination</h1>
-  <p>
-    Explore our premium selection of exotic fish, quality tanks, and 
-    everything you need for a stunning aquatic experience in Nepal.
-  </p>
-</div>
-
 <div class="products-section">
   <div class="section-header">
-    <h2>Featured Collection</h2>
-    <a href="{% url 'product_list' %}" class="view-all"
-      >View All <i class="fas fa-search"></i
-    ></a>
+    <h2>All Products</h2>
   </div>
 
   <div class="products">
@@ -48,6 +37,11 @@
         {% endif %}
       </div>
     </a>
+    {% empty %}
+    <div class="empty-state">
+        <i class="fas fa-search fa-3x"></i>
+        <p>No products found.</p>
+    </div>
     {% endfor %}
   </div>
 </div>

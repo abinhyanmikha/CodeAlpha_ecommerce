@@ -1,20 +1,20 @@
 {% extends 'base.html' %} 
 
 {% block content %}
-<div class="product-detail" style="max-width: 1000px; margin: 0 auto; padding: 2rem 0;">
-    <nav class="breadcrumb" style="margin-bottom: 2rem; font-size: 0.9rem;">
-        <a href="/" style="color: var(--text-muted); text-decoration: none;">Home</a> 
-        <i class="fas fa-chevron-right" style="font-size: 0.7rem; margin: 0 0.5rem; color: var(--border);"></i> 
+<div class="product-detail">
+    <nav class="breadcrumb">
+        <a href="/">Home</a> 
+        <i class="fas fa-chevron-right"></i> 
         <span>{{ product.name }}</span>
     </nav>
 
-    <div class="product-layout" style="display: grid; grid-template-columns: 1fr 1fr; gap: 3rem;">
+    <div class="product-layout">
         <div class="product-image">
-            <div style="background: white; border: 1px solid var(--border); border-radius: 12px; overflow: hidden;">
+            <div class="product-image-container">
                 {% if product.image %}
-                    <img src="{{ product.image.url }}" alt="{{ product.name }}" style="width: 100%; display: block;">
+                    <img src="{{ product.image.url }}" alt="{{ product.name }}">
                 {% else %}
-                    <div style="height: 400px; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; color: var(--text-muted);">
+                    <div class="product-placeholder">
                         <i class="fas fa-image fa-4x"></i>
                     </div>
                 {% endif %}
@@ -22,14 +22,14 @@
         </div>
 
         <div class="product-info">
-            <h1 style="font-family: 'Outfit', sans-serif; font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-main);">{{ product.name }}</h1>
+            <h1>{{ product.name }}</h1>
             
-            <div class="price-tag" style="margin-bottom: 2rem;">
-                <span style="font-size: 2rem; font-weight: 700; color: var(--primary);">Rs. {{ product.price }}</span>
+            <div class="price-tag">
+                <span>Rs. {{ product.price }}</span>
             </div>
 
-            <div class="stock-status" style="margin-bottom: 2rem;">
-                <span class="{% if product.stock > 0 %}text-stock{% else %}text-out{% endif %}" style="font-weight: 600;">
+            <div class="stock-status">
+                <span class="{% if product.stock > 0 %}text-stock{% else %}text-out{% endif %}">
                     {% if product.stock > 0 %}
                         <i class="fas fa-check"></i> {{ product.stock }} items in stock
                     {% else %}
@@ -38,17 +38,17 @@
                 </span>
             </div>
 
-            <div class="description" style="margin-bottom: 2.5rem; color: var(--text-muted); line-height: 1.6;">
+            <div class="product-description">
                 {{ product.description }}
             </div>
 
-            <div class="product-actions" style="display: flex; gap: 1rem;">
+            <div class="product-actions">
                 {% if product.stock > 0 %}
-                    <a href="{% url 'add_to_cart' product.id %}" class="btn-primary" style="flex: 1; justify-content: center; padding: 1rem;">
+                    <a href="{% url 'add_to_cart' product.id %}" class="btn-primary btn-large">
                         <i class="fas fa-cart-plus"></i> Add to Cart
                     </a>
                 {% else %}
-                    <button class="btn-primary btn-disabled" style="flex: 1; border-radius: 8px;" disabled>
+                    <button class="btn-primary btn-disabled btn-large" disabled>
                         Out of Stock
                     </button>
                 {% endif %}
@@ -59,10 +59,4 @@
         </div>
     </div>
 </div>
-
-<style>
-    @media (max-width: 768px) {
-        .product-layout { grid-template-columns: 1fr; gap: 2rem; }
-    }
-</style>
 {% endblock %}

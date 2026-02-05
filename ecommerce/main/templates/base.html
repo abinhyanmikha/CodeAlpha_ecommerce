@@ -22,20 +22,21 @@
             </a>
             <div class="nav-links">
                 <a href="/" class="{% if request.path == '/' %}active{% endif %}">Home</a>
-                <a href="/cart/" class="cart-link {% if request.path == '/cart/' %}active{% endif %}">
+                <a href="{% url 'product_list' %}" class="{% if request.path == '/products/' %}active{% endif %}">Products</a>
+                <a href="{% url 'cart' %}" class="cart-link {% if request.path == '/cart/' %}active{% endif %}">
                     <i class="fas fa-shopping-cart"></i>
                     <span>Cart</span>
                 </a>
                 {% if user.is_authenticated %}
                     <div class="user-menu">
                         {% if user.is_staff %}
-                            <a href="/admin/" target="_blank" class="btn-outline" style="margin-right: 0.5rem; border-color: var(--primary); color: var(--primary) !important;">
+                            <a href="/admin/" target="_blank" class="btn-outline btn-admin">
                                 <i class="fas fa-user-shield"></i> Admin
                             </a>
                         {% endif %}
-                        <a href="/profile/" class="{% if '/profile/' in request.path %}active{% endif %}" style="margin-right: 0.5rem; color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.9rem;">Profile</a>
+                        <a href="{% url 'profile' %}" class="{% if '/profile/' in request.path %}active{% endif %}" class="nav-text">Profile</a>
                         <span class="user-greeting">Hi, {{ user.username }}</span>
-                        <a href="/logout/" class="btn-outline">Logout</a>
+                        <a href="{% url 'logout' %}" class="btn-outline">Logout</a>
                     </div>
                 {% else %}
                     <a href="/login/" class="btn-primary">Login</a>
